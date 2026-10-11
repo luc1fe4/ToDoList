@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../localization/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_borders.dart';
 import '../theme/app_radii.dart';
@@ -46,15 +47,11 @@ class _DateSelectorState extends State<DateSelector> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     // Days in current month
     final daysInMonth = DateTime(_currentMonth.year, _currentMonth.month + 1, 0).day;
     // First weekday of month (1 = Mon, 7 = Sun in Dart)
     final firstWeekday = DateTime(_currentMonth.year, _currentMonth.month, 1).weekday;
-
-    final monthNames = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
 
     return StickerContainer(
       backgroundColor: AppColors.surface,
@@ -76,7 +73,7 @@ class _DateSelectorState extends State<DateSelector> {
               Expanded(
                 child: Center(
                   child: Text(
-                    '${monthNames[_currentMonth.month - 1]} ${_currentMonth.year}',
+                    loc.formatMonthYear(_currentMonth),
                     style: AppTypography.h3.copyWith(
                       fontWeight: FontWeight.w700,
                       fontSize: 18,
@@ -95,7 +92,7 @@ class _DateSelectorState extends State<DateSelector> {
           // Day of week headers
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: const ['M', 'T', 'W', 'T', 'F', 'S', 'S']
+            children: loc.calendarWeekdayHeaders
                 .map((day) => SizedBox(
                       width: 32,
                       child: Text(
@@ -175,6 +172,7 @@ class _DateSelectorState extends State<DateSelector> {
           // Quick Chips: Today & Tomorrow
           Builder(
             builder: (context) {
+              final loc = AppLocalizations.of(context);
               final now = DateTime.now();
               final bool isFixture = widget.selectedDate.year == 2026 &&
                   widget.selectedDate.month == 10 &&
@@ -183,8 +181,6 @@ class _DateSelectorState extends State<DateSelector> {
               final refDate = isFixture ? widget.selectedDate : DateTime(now.year, now.month, now.day);
               final today = DateTime(refDate.year, refDate.month, refDate.day);
               final tomorrow = today.add(const Duration(days: 1));
-              final todayMonthStr = monthNames[today.month - 1].substring(0, 3);
-              final tomorrowMonthStr = monthNames[tomorrow.month - 1].substring(0, 3);
 
               return Row(
                 children: [
@@ -208,7 +204,7 @@ class _DateSelectorState extends State<DateSelector> {
                           ),
                         ),
                         child: Text(
-                          'Today · $todayMonthStr ${today.day}',
+                          loc.quickChipToday(loc.formatDateChip(today)),
                           style: AppTypography.metadata.copyWith(
                             fontWeight: FontWeight.w700,
                             color: AppColors.textPrimary,
@@ -238,7 +234,7 @@ class _DateSelectorState extends State<DateSelector> {
                           ),
                         ),
                         child: Text(
-                          'Tomorrow · $tomorrowMonthStr ${tomorrow.day}',
+                          loc.quickChipTomorrow(loc.formatDateChip(tomorrow)),
                           style: AppTypography.metadata.copyWith(
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,

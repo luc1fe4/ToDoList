@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/mock/mock_tasks.dart';
 import '../../../core/models/task_model.dart';
 import '../../../core/state/task_store.dart';
@@ -202,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _showCompletionSnackbar(
         initialCompleted.id,
         initialCompleted.title,
-        message: 'Task complete · 6 today / 19 this week',
+        message: AppLocalizations.current.taskCompleteSnackbarDetailed(6, 19),
       );
     }
   }
@@ -220,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _showCompletionSnackbar(
         initialCompleted.id,
         initialCompleted.title,
-        message: 'Task complete · 6 today / 19 this week',
+        message: AppLocalizations.current.taskCompleteSnackbarDetailed(6, 19),
       );
     }
   }
@@ -304,7 +305,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     final count = TaskStore.instance.completedTasks.length;
-    final msg = message ?? 'Task complete · $count completed today';
+    final msg = message ?? AppLocalizations.of(context).taskCompleteSnackbar(count);
 
     setState(() {
       _snackbar = _SnackbarState(
@@ -350,6 +351,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+
     return Scaffold(
       backgroundColor: AppColors.canvas,
       body: SafeArea(
@@ -377,7 +380,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Expanded(
-                                child: Text('Tasks', style: AppTypography.h1),
+                                child: Text(loc.tasksTitle, style: AppTypography.h1),
                               ),
                               Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -408,6 +411,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(height: AppSpacing.s16),
                           StickerSearchBar(
                             readOnly: true,
+                            hintText: loc.searchHint,
                             onTap: widget.onSearchTap,
                           ),
                           const SizedBox(height: AppSpacing.s12),
@@ -416,14 +420,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             onTabSelected: _onFilterChanged,
                           ),
                           const SizedBox(height: AppSpacing.s16),
-                          _buildSubheadRow(),
+                          _buildSubheadRow(loc),
                         ],
                       ),
                     ),
                   ),
 
                   // Main Content
-                  _buildContentSliver(),
+                  _buildContentSliver(loc),
 
                   // Bottom padding to clear fixed navigation & snackbar
                   const SliverToBoxAdapter(
@@ -459,26 +463,17 @@ class _HomeScreenState extends State<HomeScreen> {
   // Subhead row
   // -------------------------------------------------------------------------
 
-  Widget _buildSubheadRow() {
+  Widget _buildSubheadRow(AppLocalizations loc) {
     final now = DateTime.now();
-    const weekdayNames = [
-      'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
-    ];
-    const monthNames = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    final weekday = weekdayNames[now.weekday - 1];
-    final month = monthNames[now.month - 1];
 
     if (widget.emptyVariant != HomeEmptyVariant.none) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
-              child: Text('$weekday, $month ${now.day}, ${now.year}',
+              child: Text(loc.formatSubheadDate(now, includeWeekday: true, includeYear: true),
                   style: AppTypography.metadata)),
-          Text('0 tasks', style: AppTypography.metadata),
+          Text(loc.tasksCount(0), style: AppTypography.metadata),
         ],
       );
     }
@@ -493,19 +488,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
     switch (_currentFilter) {
       case TaskFilterTab.all:
-        heading = 'A little more done.';
-        dateLabel = '$weekday, $month ${now.day}';
-        countLabel = '$allCount tasks';
+        heading = loc.subheadAll;
+        dateLabel = loc.formatSubheadDate(now, includeWeekday: true, includeYear: false);
+        countLabel = loc.tasksCount(allCount);
         break;
       case TaskFilterTab.today:
-        heading = 'Make today yours.';
-        dateLabel = '$weekday, $month ${now.day}, ${now.year}';
-        countLabel = '$todayCount tasks';
+        heading = loc.subheadToday;
+        dateLabel = loc.formatSubheadDate(now, includeWeekday: true, includeYear: true);
+        countLabel = loc.tasksCount(todayCount);
         break;
       case TaskFilterTab.upcoming:
-        heading = 'On the horizon.';
-        dateLabel = 'After today · $month ${now.day}, ${now.year}';
-        countLabel = '$upcomingCount tasks';
+        heading = loc.subheadUpcoming;
+        dateLabel = loc.afterToday(loc.formatSubheadDate(now, includeWeekday: false, includeYear: true));
+        countLabel = loc.tasksCount(upcomingCount);
         break;
     }
 
@@ -532,7 +527,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // Content sliver dispatcher
   // -------------------------------------------------------------------------
 
-  Widget _buildContentSliver() {
+  Widget _buildContentSliver(AppLocalizations loc) {
     if (widget.emptyVariant == HomeEmptyVariant.allEmpty ||
         (_currentFilter == TaskFilterTab.all &&
             widget.emptyVariant != HomeEmptyVariant.none)) {
@@ -540,10 +535,9 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Padding(
           padding: const EdgeInsets.only(top: AppSpacing.s32),
           child: EmptyState(
-            title: 'Start with one small thing.',
-            description:
-                'A blank page, a clear head. Add a task whenever you\'re ready.',
-            buttonLabel: 'Create your first task',
+            title: loc.emptyAllTitle,
+            description: loc.emptyAllDesc,
+            buttonLabel: loc.emptyAllButton,
             onButtonPressed: widget.onAddTap,
           ),
         ),
@@ -557,10 +551,9 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Padding(
           padding: const EdgeInsets.only(top: AppSpacing.s32),
           child: EmptyState(
-            title: 'Today has room to breathe.',
-            description:
-                'Nothing is due today. Enjoy the space, or add a little something.',
-            buttonLabel: 'Add a task for today',
+            title: loc.emptyTodayTitle,
+            description: loc.emptyTodayDesc,
+            buttonLabel: loc.emptyTodayButton,
             onButtonPressed: widget.onAddTap,
           ),
         ),
@@ -574,10 +567,9 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Padding(
           padding: const EdgeInsets.only(top: AppSpacing.s32),
           child: EmptyState(
-            title: 'Nothing on the horizon.',
-            description:
-                'No future tasks yet. Give a task a date after today and it\'ll show up here.',
-            buttonLabel: 'Plan a future task',
+            title: loc.emptyUpcomingTitle,
+            description: loc.emptyUpcomingDesc,
+            buttonLabel: loc.emptyUpcomingButton,
             onButtonPressed: widget.onAddTap,
           ),
         ),
@@ -586,11 +578,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
     switch (_currentFilter) {
       case TaskFilterTab.all:
-        return _buildAllTasksSliver();
+        return _buildAllTasksSliver(loc);
       case TaskFilterTab.today:
-        return _buildTodayTasksSliver();
+        return _buildTodayTasksSliver(loc);
       case TaskFilterTab.upcoming:
-        return _buildUpcomingTasksSliver();
+        return _buildUpcomingTasksSliver(loc);
     }
   }
 
@@ -598,16 +590,16 @@ class _HomeScreenState extends State<HomeScreen> {
   // All Tasks Sliver
   // -------------------------------------------------------------------------
 
-  Widget _buildAllTasksSliver() {
+  Widget _buildAllTasksSliver(AppLocalizations loc) {
     final activeTasks = TaskStore.instance.activeTasks;
     if (activeTasks.isEmpty) {
       return SliverToBoxAdapter(
         child: Padding(
           padding: const EdgeInsets.only(top: AppSpacing.s32),
           child: EmptyState(
-            title: 'All done!',
-            description: 'Every task has been completed. Ready to add more?',
-            buttonLabel: 'Add a task',
+            title: loc.emptyAllDoneTitle,
+            description: loc.emptyAllDoneDesc,
+            buttonLabel: loc.emptyAllDoneButton,
             onButtonPressed: widget.onAddTap,
           ),
         ),
@@ -639,7 +631,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // Today Tasks Sliver
   // -------------------------------------------------------------------------
 
-  Widget _buildTodayTasksSliver() {
+  Widget _buildTodayTasksSliver(AppLocalizations loc) {
     final todayTasks = TaskStore.instance.todayTasks;
     final morningTasks =
         todayTasks.where((t) => t.timeOfDayGroup == 'MORNING').toList();
@@ -653,25 +645,24 @@ class _HomeScreenState extends State<HomeScreen> {
       sliver: SliverList(
         delegate: SliverChildListDelegate([
           if (morningTasks.isNotEmpty) ...[
-            TaskSectionHeader(title: 'MORNING', count: morningTasks.length),
+            TaskSectionHeader(title: loc.sectionMorning, count: morningTasks.length),
             ...morningTasks.map((t) => _buildAnimatedCard(t)),
           ],
           if (afternoonTasks.isNotEmpty) ...[
-            TaskSectionHeader(title: 'AFTERNOON', count: afternoonTasks.length),
+            TaskSectionHeader(title: loc.sectionAfternoon, count: afternoonTasks.length),
             ...afternoonTasks.map((t) => _buildAnimatedCard(t)),
           ],
           if (eveningTasks.isNotEmpty) ...[
-            TaskSectionHeader(title: 'EVENING', count: eveningTasks.length),
+            TaskSectionHeader(title: loc.sectionEvening, count: eveningTasks.length),
             ...eveningTasks.map((t) => _buildAnimatedCard(t)),
           ],
           if (todayTasks.isEmpty)
             Padding(
               padding: const EdgeInsets.only(top: AppSpacing.s32),
               child: EmptyState(
-                title: 'Today has room to breathe.',
-                description:
-                    'All tasks for today are done. Enjoy the space!',
-                buttonLabel: 'Add a task for today',
+                title: loc.emptyTodayTitle,
+                description: loc.emptyTodayDoneDesc,
+                buttonLabel: loc.emptyTodayButton,
                 onButtonPressed: widget.onAddTap,
               ),
             ),
@@ -684,7 +675,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // Upcoming Tasks Sliver
   // -------------------------------------------------------------------------
 
-  Widget _buildUpcomingTasksSliver() {
+  Widget _buildUpcomingTasksSliver(AppLocalizations loc) {
     final upcomingTasks = TaskStore.instance.upcomingTasks;
 
     return SliverPadding(
@@ -692,7 +683,7 @@ class _HomeScreenState extends State<HomeScreen> {
       sliver: SliverList(
         delegate: SliverChildListDelegate([
           TaskSectionHeader(
-            title: 'FRIDAY, OCTOBER 9',
+            title: loc.isVietnamese ? 'THỨ SÁU, 9 THÁNG 10' : 'FRIDAY, OCTOBER 9',
             count: upcomingTasks.length,
           ),
           ...upcomingTasks.map((t) => _buildAnimatedCard(t)),
@@ -709,7 +700,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(width: AppSpacing.s12),
                 Expanded(
                   child: Text(
-                    'Only tasks with a future date live here. Your undated ideas stay in All.',
+                    loc.upcomingCallout,
                     style: AppTypography.metadata,
                   ),
                 ),
@@ -720,10 +711,9 @@ class _HomeScreenState extends State<HomeScreen> {
             Padding(
               padding: const EdgeInsets.only(top: AppSpacing.s32),
               child: EmptyState(
-                title: 'Nothing on the horizon.',
-                description:
-                    'No future tasks yet. Give a task a date after today and it\'ll show up here.',
-                buttonLabel: 'Plan a future task',
+                title: loc.emptyUpcomingTitle,
+                description: loc.emptyUpcomingDesc,
+                buttonLabel: loc.emptyUpcomingButton,
                 onButtonPressed: widget.onAddTap,
               ),
             ),
@@ -757,14 +747,16 @@ class _HomeScreenState extends State<HomeScreen> {
   // -------------------------------------------------------------------------
 
   Widget _buildSnackbarOverlay() {
+    final loc = AppLocalizations.of(context);
+
     // Creation snackbar (from widget prop, static)
     if (widget.showCreatedSnackbar && !_createdSnackbarDismissed) {
       return Padding(
         padding: const EdgeInsets.only(bottom: AppSpacing.s12),
         child: CompletionSnackbar(
           icon: Icons.info_outline,
-          message: 'Task created · also added to Today',
-          actionLabel: 'Dismiss',
+          message: loc.taskCreatedSnackbar,
+          actionLabel: loc.dismiss,
           onActionPressed: () =>
               setState(() => _createdSnackbarDismissed = true),
         ),
@@ -779,7 +771,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: CompletionSnackbar(
           icon: Icons.check_circle_outline,
           message: s.message,
-          actionLabel: 'Undo',
+          actionLabel: loc.undo,
           onActionPressed: _onUndo,
         ),
       );

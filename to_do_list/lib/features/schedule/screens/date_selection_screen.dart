@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_borders.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -40,11 +41,8 @@ class _DateSelectionScreenState extends State<DateSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final monthNames = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    final dateButtonLabel = 'Use ${monthNames[_selectedDate.month - 1]} ${_selectedDate.day}';
+    final loc = AppLocalizations.of(context);
+    final dateButtonLabel = loc.useDateButton(_selectedDate);
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
@@ -65,21 +63,21 @@ class _DateSelectionScreenState extends State<DateSelectionScreen> {
                     onTap: widget.onBack ?? () => Navigator.of(context).maybePop(),
                   ),
                   const SizedBox(width: AppSpacing.s16),
-                  Expanded(child: Text('Choose date', style: AppTypography.h1)),
+                  Expanded(child: Text(loc.chooseDate, style: AppTypography.h1)),
                 ],
               ),
               const SizedBox(height: AppSpacing.s24),
 
               // Subhead
               Text(
-                'NEW TASK / SCHEDULE',
+                loc.kickerNewTaskSchedule,
                 style: AppTypography.uppercaseLabel.copyWith(
                   fontWeight: FontWeight.w700,
                   color: AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: AppSpacing.s4),
-              Text('Give it a day.', style: AppTypography.h2),
+              Text(loc.dateSubhead, style: AppTypography.h2),
               const SizedBox(height: AppSpacing.s4),
               Text(
                 widget.taskTitlePreview,
@@ -110,7 +108,7 @@ class _DateSelectionScreenState extends State<DateSelectionScreen> {
                     const SizedBox(width: AppSpacing.s12),
                     Expanded(
                       child: Text(
-                        'Selected: ${formatDateLabel(_selectedDate)}. You can leave the time blank.',
+                        loc.dateSelectedHelper(formatDateLabel(_selectedDate)),
                         style: AppTypography.metadata,
                       ),
                     ),
@@ -133,7 +131,7 @@ class _DateSelectionScreenState extends State<DateSelectionScreen> {
               ),
               const SizedBox(height: AppSpacing.s12),
               StickerButton(
-                label: 'Clear date',
+                label: loc.clearDate,
                 variant: StickerButtonVariant.secondary,
                 onPressed: widget.onClear ??
                     widget.onBack ??

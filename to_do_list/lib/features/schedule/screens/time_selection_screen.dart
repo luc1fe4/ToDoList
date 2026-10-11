@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_borders.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -48,6 +49,7 @@ class _TimeSelectionScreenState extends State<TimeSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     final minuteStr = _minute.toString().padLeft(2, '0');
     final periodStr = _isPm ? 'PM' : 'AM';
     final timeStr = '$_hour:$minuteStr $periodStr';
@@ -71,21 +73,21 @@ class _TimeSelectionScreenState extends State<TimeSelectionScreen> {
                     onTap: widget.onBack ?? () => Navigator.of(context).maybePop(),
                   ),
                   const SizedBox(width: AppSpacing.s16),
-                  Expanded(child: Text('Choose time', style: AppTypography.h1)),
+                  Expanded(child: Text(loc.chooseTime, style: AppTypography.h1)),
                 ],
               ),
               const SizedBox(height: AppSpacing.s24),
 
               // Subhead
               Text(
-                'NEW TASK / SCHEDULE',
+                loc.kickerNewTaskSchedule,
                 style: AppTypography.uppercaseLabel.copyWith(
                   fontWeight: FontWeight.w700,
                   color: AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: AppSpacing.s4),
-              Text('A little time for it.', style: AppTypography.h2),
+              Text(loc.timeSubhead, style: AppTypography.h2),
               const SizedBox(height: AppSpacing.s4),
               Text(
                 widget.taskTitlePreview,
@@ -122,7 +124,9 @@ class _TimeSelectionScreenState extends State<TimeSelectionScreen> {
                     const SizedBox(width: AppSpacing.s12),
                     Expanded(
                       child: Text(
-                        'Reminder: 10 minutes before, at ${calculateReminderFromComponents(_hour, _minute, _isPm)} today.',
+                        loc.timeReminderHelper(
+                          calculateReminderFromComponents(_hour, _minute, _isPm),
+                        ),
                         style: AppTypography.metadata,
                       ),
                     ),
@@ -133,7 +137,7 @@ class _TimeSelectionScreenState extends State<TimeSelectionScreen> {
 
               // Action Buttons
               StickerButton(
-                label: 'Use $timeStr',
+                label: loc.useTime(timeStr),
                 variant: StickerButtonVariant.primary,
                 onPressed: () {
                   if (widget.onConfirm != null) {
@@ -145,7 +149,7 @@ class _TimeSelectionScreenState extends State<TimeSelectionScreen> {
               ),
               const SizedBox(height: AppSpacing.s12),
               StickerButton(
-                label: 'Clear time',
+                label: loc.clearTime,
                 variant: StickerButtonVariant.secondary,
                 onPressed: widget.onClear ??
                     widget.onBack ??

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/services/web/browser_notification_client.dart';
 import '../../../core/state/settings_store.dart';
@@ -45,6 +46,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showMascotGreeting(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -61,7 +63,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                '“Take your time today. Small wins add up to big calm!” ✨',
+                loc.mascotGreeting,
                 style: TextStyle(
                   color: AppColors.textPrimary,
                   fontWeight: FontWeight.w600,
@@ -83,6 +85,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required List<String> options,
     required String currentValue,
     required ValueChanged<String> onSelected,
+    String Function(String)? labelBuilder,
   }) {
     showModalBottomSheet(
       context: context,
@@ -143,6 +146,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const SizedBox(height: 16),
                 ...options.map((option) {
                   final isSelected = option == currentValue;
+                  final displayLabel = labelBuilder != null ? labelBuilder(option) : option;
                   return Container(
                     margin: const EdgeInsets.only(bottom: 8),
                     decoration: BoxDecoration(
@@ -171,7 +175,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             children: [
                               Expanded(
                                 child: Text(
-                                  option,
+                                  displayLabel,
                                   style: TextStyle(
                                     fontFamily: AppTypography.fontFamily,
                                     fontSize: 15,
@@ -212,6 +216,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _showPermissionDialog(BuildContext context) {
     final store = SettingsStore.instance;
+    final loc = AppLocalizations.of(context);
     NotificationPermissionStatus? permStatus;
 
     showModalBottomSheet(
@@ -264,7 +269,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            kIsWeb ? 'Web Reminders & Notifications' : 'Local Reminders Permission',
+                            kIsWeb ? loc.webRemindersTitle : loc.localRemindersTitle,
                             style: TextStyle(
                               fontFamily: AppTypography.fontFamily,
                               fontSize: 18,
@@ -277,9 +282,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      kIsWeb
-                          ? 'This notebook notifies you 10 minutes before timed deadlines while the page is open. No backend or cloud account is required.'
-                          : 'This app uses device-local reminder alerts to notify you for timed tasks. No cloud syncing or external notification server is needed.',
+                      kIsWeb ? loc.webRemindersDesc : loc.localRemindersDesc,
                       style: TextStyle(
                         fontSize: 14,
                         color: AppColors.textSecondary,
@@ -324,12 +327,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             Expanded(
                               child: Text(
                                 permStatus == NotificationPermissionStatus.granted
-                                    ? 'Browser notifications enabled'
+                                    ? loc.browserPermGranted
                                     : permStatus == NotificationPermissionStatus.denied
-                                        ? 'Browser notifications blocked in browser settings. In-app alerts will be used.'
+                                        ? loc.browserPermDenied
                                         : permStatus == NotificationPermissionStatus.unsupported
-                                            ? 'Browser notification API not supported. In-app alerts will be used.'
-                                            : 'Browser notification permission not yet granted.',
+                                            ? loc.browserPermUnsupported
+                                            : loc.browserPermNotGranted,
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
@@ -350,7 +353,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          kIsWeb ? 'Allow browser notifications' : 'Allow notifications',
+                          kIsWeb
+                              ? (loc.isVietnamese ? 'Cho phép thông báo trình duyệt' : 'Allow browser notifications')
+                              : (loc.isVietnamese ? 'Cho phép thông báo' : 'Allow notifications'),
                           style: TextStyle(
                             fontFamily: AppTypography.fontFamily,
                             fontSize: 15,
@@ -385,7 +390,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         height: 44,
                         child: OutlinedButton.icon(
                           icon: const Icon(Icons.notifications_active_outlined, size: 18),
-                          label: const Text('Send test notification'),
+                          label: Text(loc.testReminder),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppColors.textPrimary,
                             side: BorderSide(color: AppColors.outline, width: 1.5),
@@ -399,8 +404,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               SnackBar(
                                 content: Text(
                                   kIsWeb && permStatus != NotificationPermissionStatus.granted
-                                      ? 'In-app reminder alert triggered! (Browser notification blocked or pending)'
-                                      : 'Test notification sent! Check notification center.',
+                                      ? (loc.isVietnamese
+                                          ? 'Cảnh báo nhắc nhở trong ứng dụng đã kích hoạt! (Thông báo trình duyệt bị chặn hoặc chưa cấp quyền)'
+                                          : 'In-app reminder alert triggered! (Browser notification blocked or pending)')
+                                      : (loc.isVietnamese
+                                          ? 'Đã gửi thông báo thử! Kiểm tra trung tâm thông báo.'
+                                          : 'Test notification sent! Check notification center.'),
                                 ),
                                 duration: const Duration(seconds: 3),
                               ),
@@ -423,8 +432,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                         ),
                         onPressed: () => Navigator.of(ctx).pop(),
-                        child: const Text(
-                          'Done',
+                        child: Text(
+                          loc.close,
                           style: TextStyle(
                             fontFamily: AppTypography.fontFamily,
                             fontWeight: FontWeight.w700,
@@ -443,6 +452,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showEmptyStateModalPreview(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -474,7 +484,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Empty Task State Preview',
+                    loc.emptyPreviewTitle,
                     style: TextStyle(
                       fontFamily: AppTypography.fontFamily,
                       fontSize: 18,
@@ -492,10 +502,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Expanded(
                 child: Center(
                   child: EmptyState(
-                    title: 'Start with one small thing.',
-                    description:
-                        'A calm notebook is ready for whatever matters most to you right now.',
-                    buttonLabel: 'Create your first task',
+                    title: loc.emptyAllTitle,
+                    description: loc.emptyAllDesc,
+                    buttonLabel: loc.emptyAllButton,
                     onButtonPressed: () {
                       Navigator.of(ctx).pop();
                       widget.onNavTabChanged?.call(NavigationTab.tasks);
@@ -609,6 +618,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final store = SettingsStore.instance;
+    final loc = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
@@ -627,7 +637,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   children: [
                     // Kicker label: MAKE IT YOURS
                     Text(
-                      'MAKE IT YOURS',
+                      loc.kickerMakeItYours,
                       style: AppTypography.uppercaseLabel.copyWith(
                         color: AppColors.textPrimary,
                         fontWeight: FontWeight.w800,
@@ -639,7 +649,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                     // Header: Settings title (matching Figma frame)
                     Text(
-                      'Settings',
+                      loc.settingsTitle,
                       style: TextStyle(
                         fontFamily: AppTypography.fontFamily,
                         fontSize: 36,
@@ -680,7 +690,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Hello, task maker.',
+                                  loc.greetingHeader,
                                   style: TextStyle(
                                     fontFamily: AppTypography.fontFamily,
                                     fontSize: 21,
@@ -690,7 +700,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'A few calm controls for your notebook.',
+                                  loc.greetingSubhead,
                                   style: TextStyle(
                                     fontFamily: AppTypography.fontFamily,
                                     fontSize: 13.5,
@@ -709,13 +719,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     // Tile 1: Reminders
                     _buildSettingTile(
                       icon: Icons.notifications_none_rounded,
-                      title: 'Reminders',
-                      value: store.reminderPreference,
+                      title: loc.remindersSetting,
+                      value: loc.reminderOptionLabel(store.reminderPreference),
                       onTap: () {
                         _showSelectionModal(
                           context: context,
-                          title: 'Default reminder',
-                          subtitle: 'Select default notification time before due date.',
+                          title: loc.defaultReminderTitle,
+                          subtitle: loc.defaultReminderSubtitle,
                           options: [
                             'At time of task',
                             '5 minutes before',
@@ -726,6 +736,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             'Off',
                           ],
                           currentValue: store.reminderPreference,
+                          labelBuilder: (val) => loc.reminderOptionLabel(val),
                           onSelected: (val) => store.setReminderPreference(val),
                         );
                       },
@@ -734,13 +745,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     // Tile 2: Appearance
                     _buildSettingTile(
                       icon: Icons.wb_sunny_outlined,
-                      title: 'Appearance',
-                      value: store.appearance,
+                      title: loc.appearanceSetting,
+                      value: loc.appearanceOptionLabel(store.appearance),
                       onTap: () {
                         _showSelectionModal(
                           context: context,
-                          title: 'Appearance theme',
-                          subtitle: 'Choose notebook styling and paper accent.',
+                          title: loc.appearanceTitle,
+                          subtitle: loc.appearanceSubtitle,
                           options: [
                             'Light & bright',
                             'Warm Paper',
@@ -748,6 +759,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             'Dark Ink',
                           ],
                           currentValue: store.appearance,
+                          labelBuilder: (val) => loc.appearanceOptionLabel(val),
                           onSelected: (val) => store.setAppearance(val),
                         );
                       },
@@ -756,20 +768,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     // Tile 3: Week starts on
                     _buildSettingTile(
                       icon: Icons.calendar_today_outlined,
-                      title: 'Week starts on',
-                      value: store.weekStartsOn,
+                      title: loc.weekStartsOnSetting,
+                      value: loc.weekStartsOnOptionLabel(store.weekStartsOn),
                       onTap: () {
                         _showSelectionModal(
                           context: context,
-                          title: 'Week starts on',
-                          subtitle: 'First day of the week in calendars and schedules.',
+                          title: loc.weekStartsOnTitle,
+                          subtitle: loc.weekStartsOnSubtitle,
                           options: [
                             'Sunday',
                             'Monday',
                             'Saturday',
                           ],
                           currentValue: store.weekStartsOn,
+                          labelBuilder: (val) => loc.weekStartsOnOptionLabel(val),
                           onSelected: (val) => store.setWeekStartsOn(val),
+                        );
+                      },
+                    ),
+
+                    // Tile 4: Language (English / Tiếng Việt)
+                    _buildSettingTile(
+                      icon: Icons.language_rounded,
+                      title: loc.languageSetting,
+                      value: store.language,
+                      onTap: () {
+                        _showSelectionModal(
+                          context: context,
+                          title: loc.languageTitle,
+                          subtitle: loc.languageSubtitle,
+                          options: [
+                            'English',
+                            'Tiếng Việt',
+                          ],
+                          currentValue: store.language,
+                          onSelected: (val) => store.setLanguage(val),
                         );
                       },
                     ),
@@ -803,7 +836,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                'Notifications will use your device’s local reminder permissions.',
+                                loc.infoBannerNote,
                                 style: TextStyle(
                                   fontFamily: AppTypography.fontFamily,
                                   fontSize: 13.5,
@@ -845,7 +878,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             child: Center(
                               child: Text(
-                                'Preview empty task state',
+                                loc.previewEmptyTaskState,
                                 style: TextStyle(
                                   fontFamily: AppTypography.fontFamily,
                                   fontSize: 16,

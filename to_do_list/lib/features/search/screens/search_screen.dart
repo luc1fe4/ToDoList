@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/mock/mock_tasks.dart';
 import '../../../core/models/task_category.dart';
 import '../../../core/models/task_model.dart';
@@ -73,6 +74,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: AppColors.canvas,
       body: SafeArea(
@@ -98,12 +100,12 @@ class _SearchScreenState extends State<SearchScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Expanded(child: Text('Search', style: AppTypography.h1)),
+                              Expanded(child: Text(loc.searchTitle, style: AppTypography.h1)),
                               GestureDetector(
                                 onTap: widget.onCancel,
                                 behavior: HitTestBehavior.opaque,
                                 child: Text(
-                                  'Cancel',
+                                  loc.cancel,
                                   style: AppTypography.h3.copyWith(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 16,
@@ -116,7 +118,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           // Search Input Field
                           StickerSearchBar(
                             controller: _searchController,
-                            hintText: 'Search your tasks',
+                            hintText: loc.searchHint,
                             onClear: _onClear,
                             onChanged: (val) {
                               setState(() {
@@ -146,11 +148,11 @@ class _SearchScreenState extends State<SearchScreen> {
                             spacing: AppSpacing.s8,
                             runSpacing: AppSpacing.s8,
                             children: [
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
+                              Wrap(
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                spacing: AppSpacing.s8,
                                 children: [
-                                  Text('Within category', style: AppTypography.body),
-                                  const SizedBox(width: AppSpacing.s8),
+                                  Text(loc.withinCategory, style: AppTypography.body),
                                   CategoryBadge(
                                     category: _selectedCategory,
                                     isSelected: true,
@@ -168,7 +170,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                 },
                                 behavior: HitTestBehavior.opaque,
                                 child: Text(
-                                  'Change',
+                                  loc.change,
                                   style: AppTypography.h3.copyWith(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
@@ -181,9 +183,11 @@ class _SearchScreenState extends State<SearchScreen> {
                           // Matches Counter (if results active)
                           if (_currentVariant == SearchStateVariant.results)
                             Text(
-                              _selectedScope == TaskFilterTab.upcoming
-                                  ? '1 match · Upcoming · ${_selectedCategory.label}'
-                                  : '3 matches · ${_selectedScope.title} · ${_selectedCategory.label}',
+                              loc.searchMatchesHeader(
+                                _selectedScope == TaskFilterTab.upcoming ? 1 : 3,
+                                loc.filterTabTitle(_selectedScope),
+                                loc.categoryLabel(_selectedCategory),
+                              ),
                               style: AppTypography.metadata,
                             ),
                         ],
@@ -192,7 +196,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
 
                   // Results / Empty State / Initial
-                  _buildResultsSliver(),
+                  _buildResultsSliver(context),
 
                   const SliverToBoxAdapter(
                     child: SizedBox(height: 120),
@@ -217,16 +221,20 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildResultsSliver() {
+  Widget _buildResultsSliver(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     if (_currentVariant == SearchStateVariant.empty) {
       return SliverToBoxAdapter(
         child: Padding(
           padding: const EdgeInsets.only(top: AppSpacing.s24),
           child: EmptyState(
-            title: 'No little things found.',
-            description:
-                'No ${_selectedCategory.label} task in ${_selectedScope.title} matches "${_searchController.text}". Try another word or change your scope.',
-            buttonLabel: 'Clear search',
+            title: loc.searchEmptyTitle,
+            description: loc.searchEmptyDesc(
+              loc.categoryLabel(_selectedCategory),
+              loc.filterTabTitle(_selectedScope),
+              _searchController.text,
+            ),
+            buttonLabel: loc.clearSearch,
             onButtonPressed: _onClear,
           ),
         ),

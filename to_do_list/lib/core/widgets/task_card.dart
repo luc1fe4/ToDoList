@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../localization/app_localizations.dart';
 import '../models/task_model.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
@@ -27,6 +28,7 @@ class TaskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     final isDone = task.isCompleted;
 
     // Shadow color: If custom given, use it. Otherwise peach/sage when active, flat when done.
@@ -83,14 +85,14 @@ class TaskCard extends StatelessWidget {
                     children: [
                       if (task.completedLabel != null)
                         Text(
-                          task.completedLabel!,
+                          loc.translateCompletedLabel(task.completedLabel),
                           style: AppTypography.metadata.copyWith(
                             color: AppColors.textSecondary,
                           ),
                         )
-                      else if (task.dueDateLabel != null)
+                      else if (task.dueDateLabel != null || task.dueDate != null)
                         Text(
-                          task.dueDateLabel!,
+                          loc.formatTaskDueDateLabel(task),
                           style: AppTypography.metadata.copyWith(
                             color: AppColors.textSecondary,
                           ),

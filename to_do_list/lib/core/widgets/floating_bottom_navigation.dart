@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../localization/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_borders.dart';
 import '../theme/app_radii.dart';
@@ -23,6 +24,8 @@ class FloatingBottomNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+
     return Container(
       height: AppSpacing.navHeight,
       margin: const EdgeInsets.only(
@@ -44,7 +47,7 @@ class FloatingBottomNavigation extends StatelessWidget {
           Expanded(
             child: _buildNavItem(
               tab: NavigationTab.tasks,
-              label: 'Tasks',
+              label: loc.navTasks,
               icon: Icons.layers_outlined,
               activeIcon: Icons.layers,
             ),
@@ -52,7 +55,7 @@ class FloatingBottomNavigation extends StatelessWidget {
           Expanded(
             child: _buildNavItem(
               tab: NavigationTab.completed,
-              label: 'Completed',
+              label: loc.navCompleted,
               icon: Icons.check,
               activeIcon: Icons.check,
             ),
@@ -60,7 +63,7 @@ class FloatingBottomNavigation extends StatelessWidget {
           Expanded(
             child: _buildNavItem(
               tab: NavigationTab.settings,
-              label: 'Settings',
+              label: loc.navSettings,
               icon: Icons.tune,
               activeIcon: Icons.tune,
             ),

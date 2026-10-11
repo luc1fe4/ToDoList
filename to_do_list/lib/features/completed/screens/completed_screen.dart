@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/models/task_model.dart';
 import '../../../core/state/task_store.dart';
 import '../../../core/theme/app_colors.dart';
@@ -60,14 +61,14 @@ class _CompletedScreenState extends State<CompletedScreen> {
             side: BorderSide(color: AppColors.surface, width: 1.5),
           ),
           content: Text(
-            '“${task.title}” moved back to active',
+            AppLocalizations.of(context).movedBackToActive(task.title),
             style: TextStyle(
               color: AppColors.surface,
               fontWeight: FontWeight.w600,
             ),
           ),
           action: SnackBarAction(
-            label: 'Undo',
+            label: AppLocalizations.of(context).undo,
             textColor: AppColors.peachAccent,
             onPressed: () {
               TaskStore.instance.completeTask(task.id);
@@ -81,6 +82,7 @@ class _CompletedScreenState extends State<CompletedScreen> {
 
   void _showCelebrationModal(BuildContext context) {
     final store = TaskStore.instance;
+    final loc = AppLocalizations.of(context);
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -144,7 +146,7 @@ class _CompletedScreenState extends State<CompletedScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Little Wins Celebration! ✨',
+                  loc.celebrationTitle,
                   style: TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: 22,
@@ -155,7 +157,7 @@ class _CompletedScreenState extends State<CompletedScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '${store.completedTodayCount} tasks accomplished today!\nYou’re building wonderful momentum.',
+                  loc.celebrationSubtitle(store.completedTodayCount),
                   style: TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: 15,
@@ -192,7 +194,7 @@ class _CompletedScreenState extends State<CompletedScreen> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Today',
+                            loc.todayStat,
                             style: TextStyle(
                               fontSize: 12,
                               color: AppColors.textSecondary,
@@ -214,7 +216,7 @@ class _CompletedScreenState extends State<CompletedScreen> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'This Week',
+                            loc.thisWeekStat,
                             style: TextStyle(
                               fontSize: 12,
                               color: AppColors.textSecondary,
@@ -236,7 +238,7 @@ class _CompletedScreenState extends State<CompletedScreen> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Pace',
+                            loc.paceStat,
                             style: TextStyle(
                               fontSize: 12,
                               color: AppColors.textSecondary,
@@ -262,9 +264,9 @@ class _CompletedScreenState extends State<CompletedScreen> {
                       ),
                     ),
                     onPressed: () => Navigator.of(ctx).pop(),
-                    child: const Text(
-                      'Keep up the momentum',
-                      style: TextStyle(
+                    child: Text(
+                      loc.keepUpMomentum,
+                      style: const TextStyle(
                         fontFamily: AppTypography.fontFamily,
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
@@ -281,6 +283,7 @@ class _CompletedScreenState extends State<CompletedScreen> {
   }
 
   void _showTaskDetailSheet(TaskModel task) {
+    final loc = AppLocalizations.of(context);
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -324,7 +327,7 @@ class _CompletedScreenState extends State<CompletedScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  task.completedLabel ?? 'Completed today',
+                  loc.translateCompletedLabel(task.completedLabel),
                   style: TextStyle(
                     fontSize: 14,
                     color: AppColors.textSecondary,
@@ -347,7 +350,7 @@ class _CompletedScreenState extends State<CompletedScreen> {
                           _handleUncompleteTask(task);
                         },
                         child: Text(
-                          'Mark Incomplete',
+                          loc.markIncomplete,
                           style: TextStyle(
                             color: AppColors.textPrimary,
                             fontWeight: FontWeight.w700,
@@ -371,9 +374,9 @@ class _CompletedScreenState extends State<CompletedScreen> {
                           Navigator.of(ctx).pop();
                           TaskStore.instance.deleteCompletedTask(task.id);
                         },
-                        child: const Text(
-                          'Delete',
-                          style: TextStyle(
+                        child: Text(
+                          loc.delete,
+                          style: const TextStyle(
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -402,6 +405,7 @@ class _CompletedScreenState extends State<CompletedScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     final store = TaskStore.instance;
     final completedTasks = store.completedTasks;
     final showEmpty = widget.isEmpty || completedTasks.isEmpty;
@@ -434,7 +438,7 @@ class _CompletedScreenState extends State<CompletedScreen> {
                         children: [
                           // Kicker label: YOUR LITTLE WINS
                           Text(
-                            'YOUR LITTLE WINS',
+                            loc.kickerLittleWins,
                             style: AppTypography.uppercaseLabel.copyWith(
                               color: AppColors.textPrimary,
                               fontWeight: FontWeight.w800,
@@ -451,7 +455,7 @@ class _CompletedScreenState extends State<CompletedScreen> {
                             children: [
                               Expanded(
                                 child: Text(
-                                  'Completed',
+                                  loc.completedTitle,
                                   style: TextStyle(
                                     fontFamily: AppTypography.fontFamily,
                                     fontSize: 36,
@@ -532,7 +536,7 @@ class _CompletedScreenState extends State<CompletedScreen> {
                                           ),
                                           const SizedBox(height: 6),
                                           Text(
-                                            'done today',
+                                            loc.doneToday,
                                             style: TextStyle(
                                               fontFamily: AppTypography.fontFamily,
                                               fontSize: 15,
@@ -577,7 +581,7 @@ class _CompletedScreenState extends State<CompletedScreen> {
 
                                   // Rhythm motivational text
                                   Text(
-                                    motivationalMessage,
+                                    loc.translateMotivationalMessage(motivationalMessage),
                                     style: TextStyle(
                                       fontFamily: AppTypography.fontFamily,
                                       fontSize: 15,
@@ -600,7 +604,7 @@ class _CompletedScreenState extends State<CompletedScreen> {
                                     children: [
                                       Expanded(
                                         child: Text(
-                                          'Completed this week',
+                                          loc.completedThisWeek,
                                           style: TextStyle(
                                             fontFamily: AppTypography.fontFamily,
                                             fontSize: 14,
@@ -610,7 +614,7 @@ class _CompletedScreenState extends State<CompletedScreen> {
                                         ),
                                       ),
                                       Text(
-                                        '$completedThisWeekCount tasks',
+                                        loc.tasksCount(completedThisWeekCount),
                                         style: TextStyle(
                                           fontFamily: AppTypography.fontFamily,
                                           fontSize: 15,
@@ -632,7 +636,7 @@ class _CompletedScreenState extends State<CompletedScreen> {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    'Today’s wins',
+                                    loc.todaysWins,
                                     style: TextStyle(
                                       fontFamily: AppTypography.fontFamily,
                                       fontSize: 24,
@@ -642,7 +646,7 @@ class _CompletedScreenState extends State<CompletedScreen> {
                                   ),
                                 ),
                                 Text(
-                                  '${completedTasks.length} shown',
+                                  loc.shownCount(completedTasks.length),
                                   style: TextStyle(
                                     fontFamily: AppTypography.fontFamily,
                                     fontSize: 14,
@@ -664,10 +668,9 @@ class _CompletedScreenState extends State<CompletedScreen> {
                       child: Padding(
                         padding: const EdgeInsets.only(top: AppSpacing.s32),
                         child: EmptyState(
-                          title: 'A fresh page.',
-                          description:
-                              'Complete your first task and give yourself a little credit.',
-                          buttonLabel: 'Go to Tasks',
+                          title: loc.emptyCompletedTitle,
+                          description: loc.emptyCompletedDesc,
+                          buttonLabel: loc.goToTasks,
                           onButtonPressed: widget.onGoToTasks,
                         ),
                       ),

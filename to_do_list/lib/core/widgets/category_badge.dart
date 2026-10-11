@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../localization/app_localizations.dart';
 import '../models/task_category.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_borders.dart';
@@ -23,6 +24,9 @@ class CategoryBadge extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    final loc = AppLocalizations.of(context);
+    final label = loc.categoryLabel(category);
+
     // In selection rows: selected state may highlight, otherwise default category color
     final bgColor = isSelected ? (category == TaskCategory.none ? AppColors.peachShadow : category.badgeColor) : (onTap != null ? AppColors.surface : category.badgeColor);
 
@@ -37,7 +41,7 @@ class CategoryBadge extends StatelessWidget {
         ),
       ),
       child: Text(
-        category.label,
+        label,
         style: AppTypography.caption.copyWith(
           color: AppColors.textPrimary,
           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,

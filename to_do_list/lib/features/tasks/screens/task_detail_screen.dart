@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/mock/mock_tasks.dart';
 import '../../../core/models/task_model.dart';
 import '../../../core/state/task_store.dart';
@@ -31,6 +32,7 @@ class TaskDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     final activeTask = (task != null ? TaskStore.instance.getTask(task!.id) : null) ??
         task ??
         MockTasks.taskFinishFlutter;
@@ -40,28 +42,54 @@ class TaskDetailScreen extends StatelessWidget {
         ? formatReminderTimeBefore(dueTimeStr, minutesBefore: 10)
         : null;
 
-    final dateLine1 = isEditedPreview
-        ? 'Tomorrow, Friday October 9'
-        : (activeTask.dueDateLabel?.contains('Tomorrow') == true
-            ? 'Tomorrow, Friday October 9'
-            : (activeTask.dueDateLabel?.contains('Today') == true
-                ? 'Today, Thursday October 8'
-                : (activeTask.dueDateLabel ?? 'Today, Thursday October 8')));
+    final isTomorrowTask = isEditedPreview || (activeTask.dueDateLabel?.contains('Tomorrow') == true);
+    final isTodayTask = activeTask.dueDateLabel?.contains('Today') == true;
+
+    final String dateLine1;
+    if (loc.isVietnamese) {
+      if (isTomorrowTask) {
+        dateLine1 = 'Ngày mai, Thứ Sáu 9 tháng 10';
+      } else if (isTodayTask) {
+        dateLine1 = 'Hôm nay, Thứ Năm 8 tháng 10';
+      } else {
+        dateLine1 = loc.translateDueDateLabel(activeTask.dueDateLabel);
+      }
+    } else {
+      if (isTomorrowTask) {
+        dateLine1 = 'Tomorrow, Friday October 9';
+      } else if (isTodayTask) {
+        dateLine1 = 'Today, Thursday October 8';
+      } else {
+        dateLine1 = activeTask.dueDateLabel ?? 'Today, Thursday October 8';
+      }
+    }
+
     final dateLine2 = isEditedPreview
         ? '7:00 PM · 2026'
         : (activeTask.dueTime != null
             ? '${activeTask.dueTime} · 2026'
-            : 'All day · 2026');
+            : '${loc.allDay} · 2026');
+
     final reminderLine1 = activeTask.reminderEnabled
-        ? '10 minutes before'
-        : 'No reminder';
-    final reminderLine2 = isEditedPreview
-        ? 'Friday, Oct 9 · 6:50 PM'
-        : (activeTask.reminderEnabled && reminderTimeStr != null
-            ? (activeTask.dueDateLabel?.contains('Tomorrow') == true
-                ? 'Tomorrow · $reminderTimeStr'
-                : 'Today · $reminderTimeStr')
-            : 'No timed reminder');
+        ? loc.tenMinutesBefore
+        : loc.noReminder;
+
+    final String reminderLine2;
+    if (isEditedPreview) {
+      reminderLine2 = loc.isVietnamese
+          ? 'Thứ Sáu, 9 thg 10 · 6:50 PM'
+          : 'Friday, Oct 9 · 6:50 PM';
+    } else if (activeTask.reminderEnabled && reminderTimeStr != null) {
+      if (isTomorrowTask) {
+        reminderLine2 = '${loc.tomorrow} · $reminderTimeStr';
+      } else {
+        reminderLine2 = '${loc.today} · $reminderTimeStr';
+      }
+    } else {
+      reminderLine2 = loc.noTimedReminder;
+    }
+
+    final createdDateStr = loc.isVietnamese ? '7 tháng 10, 2026' : 'October 7, 2026';
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
@@ -82,7 +110,7 @@ class TaskDetailScreen extends StatelessWidget {
                     onTap: onBack,
                   ),
                   const SizedBox(width: AppSpacing.s16),
-                  Expanded(child: Text('Task details', style: AppTypography.h1)),
+                  Expanded(child: Text(loc.taskDetailsTitle, style: AppTypography.h1)),
                 ],
               ),
               const SizedBox(height: AppSpacing.s24),
@@ -172,7 +200,7 @@ class TaskDetailScreen extends StatelessWidget {
 
                     // Created Metadata
                     Text(
-                      'Created October 7, 2026',
+                      loc.createdOn(createdDateStr),
                       style: AppTypography.metadata.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -184,13 +212,13 @@ class TaskDetailScreen extends StatelessWidget {
 
               // Action Buttons
               StickerButton(
-                label: 'Complete Task',
+                label: loc.completeTaskButton,
                 variant: StickerButtonVariant.primary,
                 onPressed: onComplete,
               ),
               const SizedBox(height: AppSpacing.s12),
               StickerButton(
-                label: 'Edit Task',
+                label: loc.editTaskButton,
                 variant: StickerButtonVariant.secondary,
                 onPressed: onEdit,
               ),
@@ -204,7 +232,7 @@ class TaskDetailScreen extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: AppSpacing.s8),
                     child: Text(
-                      'Delete Task',
+                      loc.deleteTaskButton,
                       style: AppTypography.h3.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -219,7 +247,7 @@ class TaskDetailScreen extends StatelessWidget {
               // Footer quote
               Center(
                 child: Text(
-                  'Small task. Big sigh of relief.',
+                  loc.taskDetailQuote,
                   style: AppTypography.caption,
                 ),
               ),

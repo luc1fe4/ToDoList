@@ -78,11 +78,17 @@ class StickerButton extends StatelessWidget {
                 ]
               : null,
         ),
-        child: Text(
-          label,
-          style: AppTypography.h3.copyWith(
-            color: textColor,
-            fontSize: 16,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s12),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              label,
+              style: AppTypography.h3.copyWith(
+                color: textColor,
+                fontSize: 16,
+              ),
+            ),
           ),
         ),
       ),

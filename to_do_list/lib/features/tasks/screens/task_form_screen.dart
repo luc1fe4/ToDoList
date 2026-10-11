@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/models/task_category.dart';
 import '../../../core/models/task_model.dart';
 import '../../../core/state/task_store.dart';
@@ -49,7 +50,6 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
   late TextEditingController _titleController;
   late TaskCategory _selectedCategory;
   DateTime? _selectedDate;
-  String? _selectedDateLabel;
   String? _selectedTime;
   bool _reminderEnabled = true;
 
@@ -62,7 +62,6 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
       _titleController = TextEditingController(text: t.title);
       _selectedCategory = t.category;
       _selectedDate = t.dueDate ?? DateTime(now.year, now.month, now.day);
-      _selectedDateLabel = t.dueDateLabel ?? formatDateLabel(_selectedDate!);
       _selectedTime = t.dueTime ?? '7:00 PM';
       _reminderEnabled = t.reminderEnabled;
     } else if (widget.isReadyState) {
@@ -70,14 +69,12 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
       _titleController = TextEditingController(text: 'Review Dart notes');
       _selectedCategory = TaskCategory.study;
       _selectedDate = DateTime(now.year, now.month, now.day);
-      _selectedDateLabel = formatDateLabel(_selectedDate!);
       _selectedTime = '6:00 PM';
       _reminderEnabled = true;
     } else {
       _titleController = TextEditingController();
       _selectedCategory = TaskCategory.none;
       _selectedDate = null;
-      _selectedDateLabel = null;
       _selectedTime = null;
       _reminderEnabled = false;
     }
@@ -113,7 +110,6 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
     if (!mounted) return;
     setState(() {
       _selectedDate = result;
-      _selectedDateLabel = result != null ? formatDateLabel(result) : null;
     });
   }
 
@@ -163,7 +159,6 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
         if (_selectedDate == null) {
           final now = DateTime.now();
           _selectedDate = DateTime(now.year, now.month, now.day);
-          _selectedDateLabel = formatDateLabel(_selectedDate!);
         }
       } else {
         _selectedTime = null;
@@ -173,9 +168,16 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     final isEdit = widget.mode == FormMode.edit;
-    final screenTitle = isEdit ? 'Edit Task' : 'New Task';
-    final submitButtonLabel = isEdit ? 'Save Changes' : 'Create Task';
+    final screenTitle = isEdit ? loc.editTask : loc.newTask;
+    final submitButtonLabel = isEdit ? loc.saveChangesButton : loc.createTaskButton;
+
+    final displayDateValue = _selectedDate != null
+        ? loc.formatDateChip(_selectedDate!)
+        : loc.addDateOptional;
+
+    final displayTimeValue = _selectedTime ?? loc.addTimeOptional;
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
@@ -206,10 +208,10 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
               const SizedBox(height: AppSpacing.s24),
 
               // Subhead
-              Text("What's on your mind?", style: AppTypography.h2),
+              Text(loc.formSubhead, style: AppTypography.h2),
               const SizedBox(height: AppSpacing.s4),
               Text(
-                'One small thing is a good start.',
+                loc.formSubheadDesc,
                 style: AppTypography.body,
               ),
               const SizedBox(height: AppSpacing.s24),
@@ -224,7 +226,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'TITLE · REQUIRED',
+                      loc.titleRequired,
                       style: AppTypography.uppercaseLabel.copyWith(
                         color: AppColors.textSecondary,
                         fontWeight: FontWeight.w700,
@@ -241,7 +243,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                         border: InputBorder.none,
                         isDense: true,
                         contentPadding: EdgeInsets.zero,
-                        hintText: 'e.g. Review Dart notes',
+                        hintText: loc.titleHint,
                         hintStyle: AppTypography.h3.copyWith(
                           fontSize: 18,
                           color: AppColors.textSecondary,
@@ -256,9 +258,9 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
               // Date Selector Row
               _buildSelectorRow(
                 icon: Icons.calendar_today_outlined,
-                label: 'Date',
-                value: _selectedDateLabel ?? 'Add date · optional',
-                isValueSelected: _selectedDateLabel != null,
+                label: loc.dateLabel,
+                value: displayDateValue,
+                isValueSelected: _selectedDate != null,
                 onTap: widget.onDateTap ?? _pickDate,
               ),
               const SizedBox(height: AppSpacing.s12),
@@ -266,21 +268,21 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
               // Time Selector Row
               _buildSelectorRow(
                 icon: Icons.access_time_outlined,
-                label: 'Time',
-                value: _selectedTime ?? 'Add time · optional',
+                label: loc.timeLabel,
+                value: displayTimeValue,
                 isValueSelected: _selectedTime != null,
                 onTap: widget.onTimeTap ?? _pickTime,
               ),
               const SizedBox(height: AppSpacing.s8),
               Text(
-                'Date and time are optional. A date-only task has no timed reminder.',
+                loc.dateTimeHelper,
                 style: AppTypography.caption,
               ),
               const SizedBox(height: AppSpacing.s24),
 
               // Category Selector Row
               Text(
-                'CATEGORY · OPTIONAL',
+                loc.categoryOptional,
                 style: AppTypography.uppercaseLabel.copyWith(
                   color: AppColors.textSecondary,
                   fontWeight: FontWeight.w700,
@@ -317,7 +319,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                             ),
                           ),
                           child: Text(
-                            cat.label,
+                            loc.categoryLabel(cat),
                             style: AppTypography.body.copyWith(
                               fontSize: 14,
                               fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
@@ -350,15 +352,15 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                         children: [
                           Text(
                             _selectedTime != null
-                                ? '10 minutes before'
-                                : 'No timed reminder',
+                                ? loc.tenMinutesBefore
+                                : loc.noTimedReminder,
                             style: AppTypography.h3.copyWith(fontSize: 15),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             _selectedTime != null
-                                ? 'Notification at ${formatReminderTimeBefore(_selectedTime!)}'
-                                : 'Add a date and time to enable.',
+                                ? loc.notificationAt(formatReminderTimeBefore(_selectedTime!))
+                                : loc.addDateTimeToEnable,
                             style: AppTypography.caption,
                           ),
                         ],
@@ -426,7 +428,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
               ),
               const SizedBox(height: AppSpacing.s12),
               StickerButton(
-                label: 'Cancel',
+                label: loc.cancel,
                 variant: StickerButtonVariant.secondary,
                 onPressed: widget.onCancel ?? widget.onBack,
               ),
@@ -435,7 +437,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
               // Footer Note
               Center(
                 child: Text(
-                  isEdit ? '' : 'Only a title is needed to create a task.',
+                  isEdit ? '' : loc.formFooterNote,
                   style: AppTypography.caption,
                 ),
               ),

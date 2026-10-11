@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import '../localization/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_borders.dart';
 import '../theme/app_radii.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_typography.dart';
-import '../utils/time_utils.dart';
 import 'sticker_container.dart';
 
 class TimeSelector extends StatefulWidget {
@@ -72,6 +72,7 @@ class _TimeSelectorState extends State<TimeSelector> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return StickerContainer(
       backgroundColor: AppColors.surface,
       shadowColor: AppColors.peachShadow,
@@ -82,7 +83,7 @@ class _TimeSelectorState extends State<TimeSelector> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'DUE TIME · LOCAL TIME',
+            loc.dueTimeLocal,
             style: AppTypography.uppercaseLabel.copyWith(
               color: AppColors.textPrimary,
               fontWeight: FontWeight.w700,
@@ -94,7 +95,7 @@ class _TimeSelectorState extends State<TimeSelector> {
             children: [
               // Hour Column
               _buildStepperColumn(
-                label: 'HOUR',
+                label: loc.hourLabel,
                 value: '$_hour',
                 onUp: _incrementHour,
                 onDown: _decrementHour,
@@ -102,7 +103,7 @@ class _TimeSelectorState extends State<TimeSelector> {
               const SizedBox(width: AppSpacing.s16),
               // Minute Column
               _buildStepperColumn(
-                label: 'MINUTE',
+                label: loc.minuteLabel,
                 value: _minute.toString().padLeft(2, '0'),
                 onUp: _incrementMinute,
                 onDown: _decrementMinute,
@@ -131,7 +132,7 @@ class _TimeSelectorState extends State<TimeSelector> {
           // Subtitle preview
           Center(
             child: Text(
-              '${formatDateLabel(DateTime.now())} · $_hour:${_minute.toString().padLeft(2, '0')} ${_isPm ? 'PM' : 'AM'}',
+              '${loc.formatDateChip(DateTime.now())} · $_hour:${_minute.toString().padLeft(2, '0')} ${_isPm ? 'PM' : 'AM'}',
               style: AppTypography.metadata.copyWith(
                 color: AppColors.textSecondary,
                 fontWeight: FontWeight.w500,
